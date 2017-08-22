@@ -1,6 +1,6 @@
 import btcwidget.exchanges
 
-_MOCK = True
+_MOCK = False
 
 class Config:
 	if _MOCK:

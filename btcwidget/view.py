@@ -53,12 +53,16 @@ class View:
 		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 		self.indicator.set_menu(self.menu)
 
-	def set_current_price(self, i, price_str, wnd_title):
-		GObject.idle_add(self.labels[i].set_text, price_str)
+	def _set_current_price_gui_thread(self, i, price_str, wnd_title):
+		self.labels[i].set_text(price_str)
 		if wnd_title:
-			GObject.idle_add(self.win.set_title, price_str)
-			GObject.idle_add(self.indicator.set_label, price_str, '20px')
-			GObject.idle_add(self.menu_item.set_label, price_str)
+			self.win.set_title(price_str)
+			self.win.set_title(price_str)
+			self.indicator.set_label(price_str, '20px')
+			self.menu_item.set_label(price_str)
+
+	def set_current_price(self, i, price_str, wnd_title):
+		GObject.idle_add(self._set_current_price_gui_thread, i, price_str, wnd_title)
 
 	def present_window(self, widget):
 		self.win.present()
@@ -68,4 +72,3 @@ class View:
 		x = [int((e['time'] - now) / Config.time_axis_div) for e in graph_data]
 		y = [e['close'] for e in graph_data]
 		GObject.idle_add(self.graph.set_data, i, x, y)
-
