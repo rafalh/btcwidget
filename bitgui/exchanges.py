@@ -30,6 +30,8 @@ class ExchangeProvider:
 class MockProvider:
 	"""Provider used for testing"""
 
+	ID = 'mock'
+
 	AVG_PRICE = 4000
 	NOISE = 20
 	WAVE1_A = 300
@@ -77,8 +79,10 @@ class MockProvider:
 
 class BitstampExchangeProvider(ExchangeProvider):
 
+	ID = 'bitstamp.net'
+
 	def get_name(self):
-		return 'Bitstamp.net'
+		return "Bitstamp.net"
 
 	def get_markets(self):
 		return ['BTCUSD']
@@ -120,8 +124,10 @@ class BitstampExchangeProvider(ExchangeProvider):
 
 class BitBayExchangeProvider(ExchangeProvider):
 
+	ID = 'bitbay.net'
+
 	def get_name(self):
-		return 'BitBay.net'
+		return "BitBay.net"
 
 	def get_markets(self):
 		return ['BTCPLN']
@@ -156,8 +162,10 @@ class BitBayExchangeProvider(ExchangeProvider):
 
 class BitMarketExchangeProvider(ExchangeProvider):
 	
+	ID = 'bitmarket.pl'
+
 	def get_name(self):
-		return 'BitMarket.pl'
+		return "BitMarket.pl"
 
 	def get_markets(self):
 		return ['BTCPLN']
@@ -195,3 +203,27 @@ class BitMarketExchangeProvider(ExchangeProvider):
 
 	def format_price(self, price, market):
 		return '{:.2f} PLN'.format(price)
+
+class _ExchangeProviderFactory:
+
+	def __init__(self):
+		self.cache = {}
+
+	def _create(self, id):
+		if id == BitBayExchangeProvider.ID:
+			return BitBayExchangeProvider()
+		elif id == BitMarketExchangeProvider.ID:
+			return BitMarketExchangeProvider()
+		elif id == BitstampExchangeProvider.ID:
+			return BitstampExchangeProvider()
+		elif id == MockProvider.ID:
+			return MockProvider()
+		else:
+			raise ValueError
+
+	def get(self, id):
+		if id not in self.cache:
+			return self._create(id)
+		return self.cache[id]
+
+factory = _ExchangeProviderFactory()

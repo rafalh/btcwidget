@@ -6,7 +6,7 @@ class Config:
 	if _MOCK:
 		markets = [
 			{
-				'provider': bitgui.exchanges.MockProvider(),
+				'provider': bitgui.exchanges.factory.get('mock'),
 				'market': 'BTCUSD',
 				'graph': True,
 				'wnd_title': True,
@@ -15,19 +15,19 @@ class Config:
 	else:
 		markets = [
 			# {
-			# 	'provider': exchanges.BitstampExchangeProvider(),
+			# 	'provider': bitgui.exchanges.factory.get('bitstamp.net'),
 			# 	'market': 'BTCUSD',
 			# 	'graph': False,
 			# 	'wnd_title': False,
 			# },
 			{
-				'provider': bitgui.exchanges.BitMarketExchangeProvider(),
+				'provider': bitgui.exchanges.factory.get('bitmarket.pl'),
 				'market': 'BTCPLN',
 				'graph': True,
 				'wnd_title': False,
 			},
 			{
-				'provider': bitgui.exchanges.BitBayExchangeProvider(),
+				'provider': bitgui.exchanges.factory.get('bitbay.net'),
 				'market': 'BTCPLN',
 				'graph': True,
 				'wnd_title': True,
