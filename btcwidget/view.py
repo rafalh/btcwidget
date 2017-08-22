@@ -1,8 +1,9 @@
-import time, gi
+import os, time, gi
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, GObject, AppIndicator3
 from btcwidget.config import Config
 import btcwidget.graph
+from definitions import ROOT_DIR
 
 class View:
 
@@ -29,8 +30,9 @@ class View:
 		self.graph = btcwidget.graph.Graph()
 		self.vbox.pack_start(self.graph, True, True, 10)
 
+		self.icon_path = os.path.join(ROOT_DIR, 'icon.png')
 		self.win = Gtk.Window()
-		self.win.set_icon_from_file('icon.png')
+		self.win.set_icon_from_file(self.icon_path)
 		self.win.connect('delete-event', Gtk.main_quit)
 		self.win.add(self.vbox)
 		self.win.show_all()
@@ -46,7 +48,7 @@ class View:
 		self.menu.show()
 
 		category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
-		self.indicator = AppIndicator3.Indicator.new(self.APPINDICATOR_ID, 'icon.png', category)
+		self.indicator = AppIndicator3.Indicator.new(self.APPINDICATOR_ID, self.icon_path, category)
 		self.indicator.set_title("Bitcoin Indicator")
 		self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 		self.indicator.set_menu(self.menu)

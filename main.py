@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+
 import gi, threading, time, signal
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, Gtk
 from btcwidget.view import View
 from btcwidget.config import Config
 import btcwidget.exchanges
-
 
 def thread_proc(view, market_index):
 
