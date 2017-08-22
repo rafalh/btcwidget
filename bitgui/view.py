@@ -1,4 +1,4 @@
-import gi
+import time, gi
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, GObject, AppIndicator3
 from bitgui.config import Config
@@ -38,7 +38,6 @@ class View:
 		self.create_indicator()
 
 	def create_indicator(self):
-		
 		self.menu = Gtk.Menu()
 		self.menu_item = Gtk.MenuItem("Bitcoin")
 		self.menu_item.show()
@@ -62,5 +61,9 @@ class View:
 	def present_window(self, widget):
 		self.win.present()
 
-	def set_graph_data(self, i, x, y):
+	def set_graph_data(self, i, graph_data):
+		now = time.time()
+		x = [int((e['time'] - now) / Config.time_axis_div) for e in graph_data]
+		y = [e['close'] for e in graph_data]
 		GObject.idle_add(self.graph.set_data, i, x, y)
+

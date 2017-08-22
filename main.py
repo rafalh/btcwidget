@@ -33,9 +33,7 @@ def thread_proc(view, market_index):
 			})
 
 			if graph_data:
-				x = [int((e['time'] - now) / Config.time_axis_div) for e in graph_data]
-				y = [e['close'] for e in graph_data]
-				view.set_graph_data(market_index, x, y)
+				view.set_graph_data(market_index, graph_data)
 
 		time.sleep(Config.update_interval_sec)
 
