@@ -1,8 +1,8 @@
 import time, gi
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, GObject, AppIndicator3
-from bitgui.config import Config
-import bitgui.graph
+from btcwidget.config import Config
+import btcwidget.graph
 
 class View:
 
@@ -26,7 +26,7 @@ class View:
 			self.labels.append(val_label)
 			self.vbox.pack_start(hbox, True, True, 10)
 
-		self.graph = bitgui.graph.Graph()
+		self.graph = btcwidget.graph.Graph()
 		self.vbox.pack_start(self.graph, True, True, 10)
 
 		self.win = Gtk.Window()

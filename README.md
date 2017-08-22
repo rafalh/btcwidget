@@ -1,9 +1,9 @@
-BitGUI
-======
+BTC Widget
+==========
 
 Introduction
 ------------
-BitGUI is simple Python application for checking Bitcoin value on multiple exchanges.
+BTC Widget is simple Python application for checking Bitcoin value on multiple exchanges.
 It is very simple now and supports following exchanges:
 
 * BitMarket.pl
@@ -28,7 +28,7 @@ If you want to run it in background:
 
 Notice
 ------
-Use BitGUI at your own risk.
+Use BTC Widget at your own risk.
 I'm not responsible of any loss of money resulting from using this application.
 
 License
