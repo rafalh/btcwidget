@@ -14,12 +14,12 @@ class Config:
 		]
 	else:
 		markets = [
-			# {
-			# 	'provider': btcwidget.exchanges.factory.get('bitstamp.net'),
-			# 	'market': 'BTCUSD',
-			# 	'graph': False,
-			# 	'wnd_title': False,
-			# },
+			{
+				'provider': btcwidget.exchanges.factory.get('bitstamp.net'),
+				'market': 'BTCUSD',
+				'graph': False,
+				'wnd_title': False,
+			},
 			{
 				'provider': btcwidget.exchanges.factory.get('bitmarket.pl'),
 				'market': 'BTCPLN',

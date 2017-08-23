@@ -11,24 +11,28 @@ class View:
 
 	def __init__(self):
 		self.labels = []
-		self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+		self.labels_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
 		for market_config in Config.markets:
 			provider, market = market_config['provider'], market_config['market']
 
-			hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-			hbox.set_homogeneous(False)
+			hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
 			market_name = '{} - {}:'.format(provider.get_name(), market)
 			name_label = Gtk.Label(market_name)
-			hbox.pack_start(name_label, True, True, 10)
+			name_label.set_size_request(150, 10)
+			name_label.set_alignment(0, 0.5)
+			hbox.pack_start(name_label, False, False, 10)
 			val_label = Gtk.Label()
-			hbox.pack_start(val_label, True, True, 10)
+			hbox.pack_start(val_label, False, False, 10)
 			self.labels.append(val_label)
-			self.vbox.pack_start(hbox, True, True, 10)
+			self.labels_vbox.pack_start(hbox, True, True, 2)
 
 		self.graph = btcwidget.graph.Graph()
-		self.vbox.pack_start(self.graph, True, True, 10)
+
+		self.vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+		self.vbox.pack_start(self.labels_vbox, True, True, 5)
+		self.vbox.pack_start(self.graph, True, True, 0)
 
 		self.icon_path = os.path.join(ROOT_DIR, 'icon.png')
 		self.win = Gtk.Window()
