@@ -1,6 +1,7 @@
 import btcwidget.exchanges
 
 _MOCK = False
+_USD_PLN = 3.61104691 # 25.08.2017
 
 class Config:
 	if _MOCK:
@@ -17,8 +18,9 @@ class Config:
 			{
 				'provider': btcwidget.exchanges.factory.get('bitstamp.net'),
 				'market': 'BTCUSD',
-				'graph': False,
+				'graph': True,
 				'wnd_title': False,
+				'graph_price_mult': _USD_PLN,
 			},
 			{
 				'provider': btcwidget.exchanges.factory.get('bitmarket.pl'),

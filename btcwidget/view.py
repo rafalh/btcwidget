@@ -81,8 +81,9 @@ class View:
 
 	def set_graph_data(self, i, graph_data):
 		now = time.time()
+		graph_price_mult = Config.markets[i].get('graph_price_mult', 1)
 		x = [int((e['time'] - now) / Config.time_axis_div) for e in graph_data]
-		y = [e['close'] for e in graph_data]
+		y = [e['close'] * graph_price_mult for e in graph_data]
 		GObject.idle_add(self.graph.set_data, i, x, y, self._get_color(i))
 
 	def _get_color(self, i):
