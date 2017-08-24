@@ -25,6 +25,7 @@ def thread_proc(view, market_index):
 			if now - last_graph_update >= Config.graph_interval_sec:
 				print('Updating graph data')
 				graph_data = provider.graph(market, Config.graph_period_sec, Config.graph_res)
+				graph_data = [t for t in graph_data if t['time'] > now - Config.graph_period_sec]
 				last_graph_update = now
 
 			graph_data.append({

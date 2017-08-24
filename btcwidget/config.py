@@ -40,3 +40,4 @@ class Config:
 	graph_res = 200
 	# time axis in minutes
 	time_axis_div = 1
+	dark_theme = False
