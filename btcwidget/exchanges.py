@@ -4,27 +4,27 @@ import random, time, math # mock
 
 
 class ExchangeProvider:
-	"""Exchange data provider"""
+	"""Exchange data provider interface"""
 
 	def get_name(self):
 		"""Returns exchange name"""
-		pass
+		raise NotImplementedError()
 
 	def get_markets(self):
 		"""Returns list of supported market codes"""
-		pass
+		raise NotImplementedError()
 
 	def ticker(self, market):
 		"""Returns current price"""
-		pass
+		raise NotImplementedError()
 
 	def graph(self, market, period_seconds, resolution):
 		"""Returns price list for given period"""
-		pass
+		raise NotImplementedError()
 
 	def format_price(self, price, market):
 		"""Formats price for given market adding currency symbol"""
-		return str(price)
+		raise NotImplementedError()
 
 
 class MockProvider:
