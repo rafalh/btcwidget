@@ -34,6 +34,13 @@ class Config:
 				'graph': True,
 				'wnd_title': True,
 			},
+			{
+				'provider': btcwidget.exchanges.factory.get('bitfinex.com'),
+				'market': 'tBTCUSD',
+				'graph': True,
+				'wnd_title': False,
+				'graph_price_mult': _USD_PLN,
+			},
 		]
 	update_interval_sec = 10 if not _MOCK else 1
 	graph_interval_sec = 5*60 if not _MOCK else 10
