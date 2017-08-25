@@ -125,6 +125,13 @@ class BitstampExchangeProvider(ExchangeProvider):
 class BitBayExchangeProvider(ExchangeProvider):
 
 	ID = 'bitbay.net'
+	_TID_STEP = 300
+
+	def __init__(self):
+		self._min_time = float('inf')
+		self._min_tid = float('inf')
+		self._max_tid = None
+		self._trades_cache = {}
 
 	def get_name(self):
 		return "BitBay.net"
@@ -136,14 +143,54 @@ class BitBayExchangeProvider(ExchangeProvider):
 		data = requests.get('https://bitbay.net/API/Public/{}/ticker.json'.format(market)).json()
 		return float(data['last'])
 
+	def _load_trades(self, market, since_tid = None):
+		params = {}
+		if since_tid:
+			params['since'] = since_tid
+		else:
+			params['sort'] = 'desc'
+		resp = requests.get('https://bitbay.net/API/Public/{}/trades.json'.format(market), params)
+		trades = resp.json()
+		tids = [int(t['tid']) for t in trades]
+		timestamps = [int(t['date']) for t in trades]
+		min_tid, max_tid = min(tids), max(tids)
+		min_time, max_time = min(timestamps), max(timestamps)
+
+		self._min_time = min(self._min_time, min_time)
+		self._min_tid = min(self._min_tid, since_tid or min_tid)
+
+		for t in trades:
+			self._trades_cache[int(t['tid'])] = t
+
+		print('bitbay.net trades tids {} - {} (since {})'.format(min_tid, max_tid, since_tid))
+		print('bitbay.net trades timestamps {} - {} (period {})'.format(min_time, max_time, max_time - min_time))
+		return min_tid, max_tid
+
+	def _load_trades_tid_range(self, market, since_tid, until_tid):
+		while since_tid < until_tid:
+			min_tid, max_tid = self._load_trades(market, since_tid)
+			since_tid = max_tid
+
+
+	def _load_trades_since_time(self, market, since_time):
+		# get newest
+		self._load_trades(market, self._max_tid)
+
+		print('bitbay.net should fetch trades: {} > {}?'.format(self._min_time, since_time))
+		while self._min_time > since_time:
+			since_tid = self._min_tid - self._TID_STEP
+			self._load_trades_tid_range(market, since_tid, self._min_tid)
+
 	def graph(self, market, period_seconds, resolution):
-		# there should be some dedicated API...
-		resp = requests.get('https://bitbay.net/API/Public/{}/trades.json?sort=desc'.format(market))
-		transactions = resp.json()
-		transactions = sorted(transactions, key= lambda t: int(t['date']))
+		since_time = time.time() - period_seconds
+		self._load_trades_since_time(market, since_time)
+
+		trades = [t for t in self._trades_cache.values() if t['date'] >= since_time]
+		trades = sorted(trades, key= lambda t: int(t['date']))
+
 		data = []
 		step = int(period_seconds / resolution)
-		for k, g in groupby(transactions, lambda t: int(int(t['date']) / step)*step):
+		for k, g in groupby(trades, lambda t: int(int(t['date']) / step)*step):
 			gt = list(g)
 			e = {
 				'time': k
@@ -154,6 +201,7 @@ class BitBayExchangeProvider(ExchangeProvider):
 				e['open'] = float(gt[0]['price'])
 				e['close'] = float(gt[-1]['price'])
 			data.append(e)
+
 		return data
 
 	def format_price(self, price, market):
