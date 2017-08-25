@@ -223,6 +223,18 @@ class BitMarketExchangeProvider(ExchangeProvider):
 		return data['last']
 
 	def graph(self, market, period_seconds, resolution):
+		period = self._convert_period(period_seconds)
+		data = requests.get('https://www.bitmarket.pl/graphs/{}/{}.json'.format(market, period)).json()
+		timestamps = [e['time'] for e in data]
+		max_time = max(timestamps)
+		min_time = max_time - period_seconds
+		data = [self._convert_graph_entry(e) for e in data if e['time'] > min_time]
+		return data
+
+	def format_price(self, price, market):
+		return '{:.2f} PLN'.format(price)
+
+	def _convert_period(self, period_seconds):
 		m = 60
 		h = 60*m
 		d = 24*h
@@ -242,15 +254,14 @@ class BitMarketExchangeProvider(ExchangeProvider):
 			period = '6m'
 		else:
 			period = '1y'
-		data = requests.get('https://www.bitmarket.pl/graphs/{}/{}.json'.format(market, period)).json()
-		timestamps = [e['time'] for e in data]
-		max_time = max(timestamps)
-		min_time = max_time - period_seconds
-		data = [e for e in data if e['time'] > min_time]
-		return data
+		return period
 
-	def format_price(self, price, market):
-		return '{:.2f} PLN'.format(price)
+	def _convert_graph_entry(self, e):
+		return {
+			'time': e['time'],
+			'open': float(e['open']),
+			'close': float(e['close']),
+		}
 
 class BitfinexExchangeProvider(ExchangeProvider):
 
@@ -306,7 +317,7 @@ class BitfinexExchangeProvider(ExchangeProvider):
 class _ExchangeProviderFactory:
 
 	def __init__(self):
-		self.cache = {}
+		self._cache = {}
 
 	def _create(self, id):
 		if id == BitBayExchangeProvider.ID:
@@ -323,8 +334,16 @@ class _ExchangeProviderFactory:
 			raise ValueError
 
 	def get(self, id):
-		if id not in self.cache:
+		if id not in self._cache:
 			return self._create(id)
-		return self.cache[id]
+		return self._cache[id]
+
+	def list(self):
+		return [
+			BitBayExchangeProvider.ID,
+			BitMarketExchangeProvider.ID,
+			BitstampExchangeProvider.ID,
+			BitfinexExchangeProvider.ID,
+		]
 
 factory = _ExchangeProviderFactory()

@@ -18,6 +18,7 @@ class Config:
 			{
 				'provider': btcwidget.exchanges.factory.get('bitstamp.net'),
 				'market': 'BTCUSD',
+				'ticker': True,
 				'graph': True,
 				'wnd_title': False,
 				'graph_price_mult': _USD_PLN,
@@ -25,18 +26,21 @@ class Config:
 			{
 				'provider': btcwidget.exchanges.factory.get('bitmarket.pl'),
 				'market': 'BTCPLN',
+				'ticker': True,
 				'graph': True,
 				'wnd_title': True,
 			},
-			# {
-			# 	'provider': btcwidget.exchanges.factory.get('bitbay.net'),
-			# 	'market': 'BTCPLN',
-			# 	'graph': True,
-			# 	'wnd_title': True,
-			# },
+			{
+				'provider': btcwidget.exchanges.factory.get('bitbay.net'),
+				'market': 'BTCPLN',
+				'ticker': True,
+				'graph': False,
+				'wnd_title': False,
+			},
 			{
 				'provider': btcwidget.exchanges.factory.get('bitfinex.com'),
 				'market': 'tBTCUSD',
+				'ticker': True,
 				'graph': True,
 				'wnd_title': False,
 				'graph_price_mult': _USD_PLN,
@@ -50,3 +54,12 @@ class Config:
 	# time axis in minutes
 	time_axis_div = 1
 	dark_theme = False
+
+	_callbacks = []
+
+	def register_change_callback(func):
+		Config._callbacks.append(func)
+
+	def run_change_callbacks():
+		for func in Config._callbacks:
+			func()

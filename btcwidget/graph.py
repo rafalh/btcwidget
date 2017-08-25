@@ -38,3 +38,18 @@ class Graph(FigureCanvas):
 			text.set_position((x[-1], y[-1]))
 			text.set_text(price_text)
 		self.draw()
+
+	def set_dark(self, dark):
+		if dark:
+			self.axes.patch.set_facecolor('black')
+		else:
+			self.axes.patch.set_facecolor('white')
+
+	def clear(self):
+		for i in self.lines:
+			self.axes.lines.remove(self.lines[i])
+		for i in self.texts:
+			self.axes.texts.remove(self.texts[i])
+		self.lines = {}
+		self.texts = {}
+		self.draw()
