@@ -3,6 +3,9 @@ BTC Widget
 
 Introduction
 ------------
+
+![Preview](screenshots/main_win.png?raw=true)
+
 BTC Widget is simple Python application for checking Bitcoin price on multiple exchanges.
 It is very simple now and supports following exchanges:
 

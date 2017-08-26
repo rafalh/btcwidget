@@ -312,7 +312,7 @@ class BitfinexExchangeProvider(ExchangeProvider):
 		return data
 
 	def format_price(self, price, market):
-		return '{:.2f} USD'.format(price)
+		return '${:.2f}'.format(price)
 
 class _ExchangeProviderFactory:
 
