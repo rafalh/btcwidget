@@ -1,7 +1,7 @@
 import os
 from gi.repository import Gtk
 from definitions import ROOT_DIR
-from btcwidget.config import Config
+from btcwidget.config import config
 import btcwidget.exchanges
 
 
@@ -22,24 +22,24 @@ class OptionsDialog(Gtk.Dialog):
 
 		box = self.get_content_area()
 
-		self.update_interval_entry = Gtk.Entry(text=str(Config.update_interval_sec))
+		self.update_interval_entry = Gtk.Entry(text=str(config['update_interval_sec']))
 		self._add_label_and_widget("Update Interval (sec.):", self.update_interval_entry)
 
-		self.graph_interval_entry = Gtk.Entry(text=str(Config.graph_interval_sec))
+		self.graph_interval_entry = Gtk.Entry(text=str(config['graph_interval_sec']))
 		self._add_label_and_widget("Graph Interval (sec.):", self.graph_interval_entry)
 
-		self.graph_period_entry = Gtk.Entry(text=str(Config.graph_period_sec))
+		self.graph_period_entry = Gtk.Entry(text=str(config['graph_period_sec']))
 		self._add_label_and_widget("Graph Period (sec.):", self.graph_period_entry)
 
-		self.dark_theme_check = Gtk.CheckButton("Dark Theme", active=Config.dark_theme)
+		self.dark_theme_check = Gtk.CheckButton("Dark Theme", active=config['dark_theme'])
 		box.add(self.dark_theme_check)
 
 		self.store = Gtk.TreeStore(str, bool, bool, bool, float, str, str)
 
 		exchange_ids = btcwidget.exchanges.factory.list()
 		market_config_dict = {}
-		for market_config in Config.markets:
-			market_config_dict[(market_config['provider'].ID, market_config['market'])] = market_config
+		for market_config in config['markets']:
+			market_config_dict[(market_config['exchange'], market_config['market'])] = market_config
 		
 		for id in exchange_ids:
 			provider = btcwidget.exchanges.factory.get(id)
@@ -49,7 +49,7 @@ class OptionsDialog(Gtk.Dialog):
 				market_config = market_config_dict.get((id, market), {})
 				ticker = market_config.get('ticker', False)
 				graph = market_config.get('graph', False)
-				indicator = market_config.get('wnd_title', False)
+				indicator = market_config.get('indicator', False)
 				graph_price_mult = market_config.get('graph_price_mult', 1)
 
 				self.store.append(treeiter, [market, ticker, graph, indicator, graph_price_mult, id, market])
@@ -117,31 +117,32 @@ class OptionsDialog(Gtk.Dialog):
 
 	def update_config(self):
 		try:
-			Config.update_interval_sec = int(self.update_interval_entry.get_text())
-			Config.graph_interval_sec = int(self.graph_interval_entry.get_text())
-			Config.graph_period_sec = int(self.graph_period_entry.get_text())
-			Config.dark_theme = self.dark_theme_check.get_active()
+			config['update_interval_sec'] = int(self.update_interval_entry.get_text())
+			config['graph_interval_sec'] = int(self.graph_interval_entry.get_text())
+			config['graph_period_sec'] = int(self.graph_period_entry.get_text())
+			config['dark_theme'] = self.dark_theme_check.get_active()
 
-			Config.markets = []
+			config['markets'] = []
 			treeiter = self.store.get_iter_first()
 			while treeiter:
 				childiter = self.store.iter_children(treeiter)
 				while childiter:
 					row = self.store[childiter]
 					if row[self._MARKET_COL]:
-						provider = btcwidget.exchanges.factory.get(row[self._EXCHANGE_COL])
 						market_config = {
-							'provider': provider,
+							'exchange': row[self._EXCHANGE_COL],
 							'market': row[self._MARKET_COL],
 							'ticker': row[self._TICKER_COL],
 							'graph': row[self._GRAPH_COL],
-							'wnd_title': row[self._INDICATOR_COL],
+							'indicator': row[self._INDICATOR_COL],
 							'graph_price_mult': float(row[self._PRICE_MULT_COL]),
 						}
-						if market_config['ticker'] or market_config['graph'] or market_config['wnd_title']:
-							Config.markets.append(market_config)
+						if market_config['ticker'] or market_config['graph'] or market_config['indicator']:
+							config['markets'].append(market_config)
 					childiter = self.store.iter_next(childiter)
 				treeiter = self.store.iter_next(treeiter)
 
 		except ValueError as e:
 			print(e) # ignore errors
+
+		config.save()

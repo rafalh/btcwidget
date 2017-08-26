@@ -1,65 +1,94 @@
+import json, os
 import btcwidget.exchanges
+from definitions import ROOT_DIR
 
 _MOCK = False
 _USD_PLN = 3.61104691 # 25.08.2017
 
-class Config:
+class _Config(dict):
+
 	if _MOCK:
-		markets = [
+		_DEFAULT_MARKETS = [
 			{
-				'provider': btcwidget.exchanges.factory.get('mock'),
+				'exchange': 'mock',
 				'market': 'BTCUSD',
+				'ticker': True,
 				'graph': True,
-				'wnd_title': True,
+				'indicator': True,
 			},
 		]
 	else:
-		markets = [
+		_DEFAULT_MARKETS = [
 			{
-				'provider': btcwidget.exchanges.factory.get('bitstamp.net'),
+				'exchange': 'bitstamp.net',
 				'market': 'BTCUSD',
 				'ticker': True,
 				'graph': True,
-				'wnd_title': False,
+				'indicator': False,
 				'graph_price_mult': _USD_PLN,
 			},
 			{
-				'provider': btcwidget.exchanges.factory.get('bitmarket.pl'),
+				'exchange': 'bitmarket.pl',
 				'market': 'BTCPLN',
 				'ticker': True,
 				'graph': True,
-				'wnd_title': True,
+				'indicator': True,
 			},
 			{
-				'provider': btcwidget.exchanges.factory.get('bitbay.net'),
+				'exchange': 'bitbay.net',
 				'market': 'BTCPLN',
 				'ticker': True,
 				'graph': False,
-				'wnd_title': False,
+				'indicator': False,
 			},
 			{
-				'provider': btcwidget.exchanges.factory.get('bitfinex.com'),
+				'exchange': 'bitfinex.com',
 				'market': 'tBTCUSD',
 				'ticker': True,
 				'graph': True,
-				'wnd_title': False,
+				'indicator': False,
 				'graph_price_mult': _USD_PLN,
 			},
 		]
-	update_interval_sec = 10 if not _MOCK else 1
-	graph_interval_sec = 5*60 if not _MOCK else 10
-	# show last 60 minutes
-	graph_period_sec = 60*60
-	graph_res = 200
-	# time axis in minutes
-	time_axis_div = 1
-	dark_theme = False
 
-	_callbacks = []
+	_DEFAULT = {
+		'update_interval_sec': 10 if not _MOCK else 1,
+		'graph_interval_sec': 5*60 if not _MOCK else 10,
+		# show last 60 minutes
+		'graph_period_sec': 60*60,
+		'graph_res': 200,
+		# time axis in minutes
+		'time_axis_div': 1,
+		'dark_theme': False,
+		'markets': _DEFAULT_MARKETS
+	}
 
-	def register_change_callback(func):
-		Config._callbacks.append(func)
+	CONFIG_PATH = os.path.join(ROOT_DIR, 'config.json')
 
-	def run_change_callbacks():
-		for func in Config._callbacks:
+	def __init__(self):
+		dict.__init__(self, self._DEFAULT)
+		self._callbacks = []
+
+	def load(self):
+		if _MOCK:
+			return
+		if not os.path.isfile(self.CONFIG_PATH):
+			return
+		with open(self.CONFIG_PATH, 'r') as config_file:
+			self.update(json.load(config_file))
+
+	def save(self):
+		if _MOCK:
+			return
+		config_json = json.dumps(self, indent=4)
+		with open(self.CONFIG_PATH, 'w') as config_file:
+			config_file.write(config_json)
+
+	def register_change_callback(self, func):
+		self._callbacks.append(func)
+
+	def run_change_callbacks(self):
+		for func in self._callbacks:
 			func()
+
+config = _Config()

@@ -1,15 +1,15 @@
 import os, time, gi
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, GObject, AppIndicator3
-from btcwidget.config import Config
-import btcwidget.graph
+from btcwidget.config import config
+import btcwidget.graph, btcwidget.exchanges
 from btcwidget.optionsdialog import OptionsDialog
 from definitions import ROOT_DIR
 
 class View:
 
 	APPINDICATOR_ID = 'btc-indicator'
-	if Config.dark_theme:
+	if config['dark_theme']:
 		COLORS = ['#4444FF', '#00FF00', '#FF0000', '#FFFF00', '#00FFFF', '#FF00FF']
 	else:
 		COLORS = ['#0000CC', '#00CC00', '#CC0000', '#CC8800', '#00CCCC', '#CC00CC']
@@ -20,7 +20,7 @@ class View:
 		self._tickers_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 		self._create_ticker_labels()
 
-		self._graph = btcwidget.graph.Graph(Config.dark_theme)
+		self._graph = btcwidget.graph.Graph(config['dark_theme'])
 
 		vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 		vbox.pack_start(self._tickers_vbox, False, False, 5)
@@ -34,15 +34,17 @@ class View:
 		self._win.show_all()
 
 		self.create_indicator()
+		#self.open_options_window(None)
 
 	def _create_ticker_labels(self):
 		self._tickers_vbox.forall(lambda w: w.destroy())
 		self._ticker_labels = {}
 
-		for i, market_config in enumerate(Config.markets):
+		for i, market_config in enumerate(config['markets']):
 			if market_config['ticker']:
 				hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-				provider, market = market_config['provider'], market_config['market']
+				exchange, market = market_config['exchange'], market_config['market']
+				provider = btcwidget.exchanges.factory.get(exchange)
 				market_name = '{} - {}:'.format(provider.get_name(), market)
 				color = self._get_color(i)
 				name_label = Gtk.Label(market_name)
@@ -101,15 +103,15 @@ class View:
 		dialog.destroy()
 
 	def _on_config_change(self):
-		self._graph.set_dark(Config.dark_theme)
+		self._graph.set_dark(config['dark_theme'])
 		self._create_ticker_labels()
 		self._graph.clear()
-		Config.run_change_callbacks()
+		config.run_change_callbacks()
 
 	def set_graph_data(self, i, graph_data):
 		now = time.time()
-		graph_price_mult = Config.markets[i].get('graph_price_mult', 1)
-		x = [int((e['time'] - now) / Config.time_axis_div) for e in graph_data]
+		graph_price_mult = config['markets'][i].get('graph_price_mult', 1)
+		x = [int((e['time'] - now) / config['time_axis_div']) for e in graph_data]
 		y = [float(e['close']) * graph_price_mult for e in graph_data]
 		GObject.idle_add(self._graph.set_data, i, x, y, self._get_color(i))
 
