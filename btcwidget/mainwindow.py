@@ -1,20 +1,22 @@
 import os, time, gi
-gi.require_version('AppIndicator3', '0.1')
-from gi.repository import Gtk, GObject, AppIndicator3
+from gi.repository import Gtk
 from btcwidget.config import config
 import btcwidget.graph, btcwidget.exchanges
 from btcwidget.optionsdialog import OptionsDialog
+from btcwidget.indicator import Indicator
 from definitions import ROOT_DIR
 
-class View:
+class MainWindow(Gtk.Window):
 
-	APPINDICATOR_ID = 'btc-indicator'
 	if config['dark_theme']:
-		COLORS = ['#4444FF', '#00FF00', '#FF0000', '#FFFF00', '#00FFFF', '#FF00FF']
+		_COLORS = ['#4444FF', '#00FF00', '#FF0000', '#FFFF00', '#00FFFF', '#FF00FF']
 	else:
-		COLORS = ['#0000CC', '#00CC00', '#CC0000', '#CC8800', '#00CCCC', '#CC00CC']
+		_COLORS = ['#0000CC', '#00CC00', '#CC0000', '#CC8800', '#00CCCC', '#CC00CC']
+
+	_ICON_PATH = os.path.join(ROOT_DIR, 'icon.png')
 
 	def __init__(self):
+		Gtk.Window.__init__(self, title="BTC Widget")
 
 		self._ticker_labels = {}
 		self._tickers_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -26,14 +28,12 @@ class View:
 		vbox.pack_start(self._tickers_vbox, False, False, 5)
 		vbox.pack_start(self._graph, True, True, 0)
 
-		self._icon_path = os.path.join(ROOT_DIR, 'icon.png')
-		self._win = Gtk.Window()
-		self._win.set_icon_from_file(self._icon_path)
-		self._win.connect('delete-event', Gtk.main_quit)
-		self._win.add(vbox)
-		self._win.show_all()
+		self.set_icon_from_file(self._ICON_PATH)
+		self.connect('delete-event', Gtk.main_quit)
+		self.add(vbox)
+		self.show_all()
 
-		self.create_indicator()
+		self._indicator = Indicator(self)
 		#self.open_options_window(None)
 
 	def _create_ticker_labels(self):
@@ -59,43 +59,17 @@ class View:
 
 		self._tickers_vbox.show_all()
 
-	def create_indicator(self):
-		menu = Gtk.Menu()
-
-		self._menu_item = Gtk.MenuItem("Bitcoin")
-		self._menu_item.connect('activate', self.present_window)
-		menu.append(self._menu_item)
-
-		options_menu_item = Gtk.MenuItem("Options...")
-		options_menu_item.connect('activate', self.open_options_window)
-		menu.append(options_menu_item)
-
-		menu.show_all()
-
-		category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
-		self._indicator = AppIndicator3.Indicator.new(self.APPINDICATOR_ID, self._icon_path, category)
-		self._indicator.set_title("Bitcoin Indicator")
-		self._indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-		self._indicator.set_menu(menu)
-
-	def _set_current_price_gui_thread(self, i, price_str, wnd_title):
+	def set_current_price(self, i, price_str):
 		price_html = '<span color="{}">{}</span>'.format(self._get_color(i), price_str)
 		if i in self._ticker_labels:
 			self._ticker_labels[i].set_markup(price_html)
-		if wnd_title:
-			self._win.set_title(price_str)
-			self._win.set_title(price_str)
-			self._indicator.set_label(price_str, '20px')
-			self._menu_item.set_label(price_str)
+		market_config = config['markets'][i]
+		if market_config['indicator']:
+			self.set_title(price_str)
+			self._indicator.set_current_price(price_str)
 
-	def set_current_price(self, i, price_str, wnd_title):
-		GObject.idle_add(self._set_current_price_gui_thread, i, price_str, wnd_title)
-
-	def present_window(self, widget):
-		self._win.present()
-
-	def open_options_window(self, widget):
-		dialog = OptionsDialog(self._win)
+	def open_options(self):
+		dialog = OptionsDialog(self)
 		response = dialog.run()
 		if response == Gtk.ResponseType.OK:
 			dialog.update_config()
@@ -113,7 +87,7 @@ class View:
 		graph_price_mult = config['markets'][i].get('graph_price_mult', 1)
 		x = [int((e['time'] - now) / config['time_axis_div']) for e in graph_data]
 		y = [float(e['close']) * graph_price_mult for e in graph_data]
-		GObject.idle_add(self._graph.set_data, i, x, y, self._get_color(i))
+		self._graph.set_data(i, x, y, self._get_color(i))
 
 	def _get_color(self, i):
-		return self.COLORS[i % len(self.COLORS)]
+		return self._COLORS[i % len(self._COLORS)]
