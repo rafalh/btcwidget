@@ -7,13 +7,14 @@ Introduction
 ![Preview](screenshots/main_win.png?raw=true)
 
 BTC Widget is simple Python application for checking Bitcoin price on multiple exchanges.
-It is very simple now and supports following exchanges:
+It currently supports following exchanges:
 
-* BitMarket.pl
-* BitBay.net
-* Bitstamp.net
+* Bitfinex.com (BTCUSD)
+* Bitstamp.net (BTCUSD)
+* BitMarket.pl (BTCPLN)
+* BitBay.net (BTCPLN)
 
-Application consist of Appindicator displaying current value in Tray area and window showing chart from last 24 hours.
+Application consist of Appindicator displaying current price in Tray area and window showing chart from last 24 hours.
 
 Application was developed with Linux in mind but should work on any system with GTK and Python installed.
 Tested it only on Ubuntu 16.04 (Unity) and Linux Mint 18 (Cinnamon).
@@ -24,13 +25,13 @@ Install dependencies first:
 
 	sudo apt-get install python3 python3-gi python3-matplotlib
 
-Then you can run application:
+Then you can run the application:
 
-	bitgui/main.py
+	btcwidget/main.py
 
 If you want to run it in background:
 
-	nohup bitgui/main.py &
+	nohup btcwidget/main.py &
 
 Notice
 ------
