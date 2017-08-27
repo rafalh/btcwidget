@@ -329,7 +329,7 @@ class _ExchangeProviderFactory:
 
     def get(self, id):
         if id not in self._cache:
-            return self._create(id)
+            self._cache[id] = self._create(id)
         return self._cache[id]
 
     def list(self):
