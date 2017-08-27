@@ -43,7 +43,7 @@ class _Config(dict):
 			},
 			{
 				'exchange': 'bitfinex.com',
-				'market': 'tBTCUSD',
+				'market': 'BTCUSD',
 				'ticker': True,
 				'graph': True,
 				'indicator': False,

@@ -271,10 +271,10 @@ class BitfinexExchangeProvider(ExchangeProvider):
 		return "Bitfinex.com"
 
 	def get_markets(self):
-		return ['tBTCUSD']
+		return ['BTCUSD']
 
 	def ticker(self, market):
-		resp = requests.get('https://api.bitfinex.com/v2/ticker/{}'.format(market))
+		resp = requests.get('https://api.bitfinex.com/v2/ticker/t{}'.format(market))
 		data = resp.json()
 		return data[6] # last price
 
@@ -304,7 +304,7 @@ class BitfinexExchangeProvider(ExchangeProvider):
 	def graph(self, market, period_seconds, resolution):
 		period = self._convert_period(period_seconds / 100)
 		start_ms = (time.time() - period_seconds) * 1000
-		url = 'https://api.bitfinex.com/v2/candles/trade:{}:{}/hist?start={}&limit={}'.format(period, market, start_ms, resolution)
+		url = 'https://api.bitfinex.com/v2/candles/trade:{}:t{}/hist?start={}&limit={}'.format(period, market, start_ms, resolution)
 		resp = requests.get(url)
 		data = resp.json()
 		data = [{'time': e[0]/1000, 'open': e[1], 'close': e[2]} for e in data]
