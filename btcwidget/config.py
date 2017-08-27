@@ -49,6 +49,7 @@ class _Config(dict):
         'alarm_currency': 'USD',
         'alarm_above': None,
         'alarm_below': None,
+        'alarms': [],
     }
 
     CONFIG_PATH = os.path.join(ROOT_DIR, 'config.json')

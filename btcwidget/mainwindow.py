@@ -7,7 +7,7 @@ import btcwidget.exchanges
 import btcwidget.graph
 from btcwidget.config import config
 from btcwidget.indicator import Indicator
-from btcwidget.optionsdialog import OptionsDialog
+from btcwidget.optionsdialog import open_options_dialog
 from definitions import ROOT_DIR
 
 
@@ -74,12 +74,8 @@ class MainWindow(Gtk.Window):
             self._indicator.set_current_price(price_str)
 
     def open_options(self):
-        dialog = OptionsDialog(self)
-        response = dialog.run()
-        if response == Gtk.ResponseType.OK:
-            dialog.update_config()
+        if open_options_dialog(self):
             self._on_config_change()
-        dialog.destroy()
 
     def _on_config_change(self):
         self._graph.set_dark(config['dark_theme'])

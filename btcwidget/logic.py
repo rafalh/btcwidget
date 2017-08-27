@@ -1,5 +1,6 @@
 import threading
 import time
+import sys
 from gi.repository import GObject
 
 import btcwidget.currency
@@ -27,7 +28,7 @@ class UpdateThread(threading.Thread):
             try:
                 self._update_market_ticker(i)
             except Exception as e:
-                print('Failed to update ticker data for {}: {}'.format(market_config['exchange'], e))
+                print('Failed to update ticker data for {}: {}'.format(market_config['exchange'], e), file=sys.stderr)
 
     def _update_graph(self):
         now = time.time()
@@ -41,7 +42,8 @@ class UpdateThread(threading.Thread):
                     try:
                         self._update_market_graph_data(i)
                     except Exception as e:
-                        print('Failed to update graph data for {}: {}'.format(market_config['exchange'], e))
+                        print('Failed to update graph data for {}: {}'.format(market_config['exchange'], e),
+                              file=sys.stderr)
 
                 if i in self._graph_data_dict:
                     graph_data = self._graph_data_dict[i]
@@ -53,10 +55,11 @@ class UpdateThread(threading.Thread):
         exchange, market = market_config['exchange'], market_config['market']
         provider = btcwidget.exchanges.factory.get(exchange)
         price = provider.ticker(market)
-        self._check_alarm(price, market[3:])
         price_str = btcwidget.currency.service.format_price(price, market[3:])
         print('{} {} ticker: {}'.format(provider.get_name(), market, price_str))
         GObject.idle_add(self._main_win.set_current_price, market_index, price_str)
+
+        self._check_alarms(exchange, market, price)
 
         if market_index in self._graph_data_dict:
             graph_data = self._graph_data_dict[market_index]
@@ -78,16 +81,18 @@ class UpdateThread(threading.Thread):
         self._last_graph_update = 0
         self._graph_data_dict = {}
 
-    def _check_alarm(self, price, currency):
-        changed_config = False
-        converted = btcwidget.currency.service.convert(price, currency, config['alarm_currency'])
-        if config['alarm_above'] and converted >= config['alarm_above']:
-            GObject.idle_add(btcwidget.alarmmessage.alarm_above_message, price, config['alarm_above'], currency)
-            config['alarm_above'] = None
-            changed_config = True
-        if config['alarm_below'] and converted <= config['alarm_below']:
-            GObject.idle_add(btcwidget.alarmmessage.alarm_below_message, price, config['alarm_below'], currency)
-            config['alarm_below'] = None
-            changed_config = True
-        if changed_config:
-            config.save()
+    def _check_alarms(self, exchange, market, price):
+        for alarm in config['alarms']:
+            if alarm['exchange'] == exchange and alarm['market'] == market:
+                if alarm['type'] == 'A' and price >= alarm['price']:
+                    self._trigger_alarm(alarm, price)
+                if alarm['type'] == 'B' and price <= alarm['price']:
+                    self._trigger_alarm(alarm, price)
+
+    def _trigger_alarm(self, alarm, price):
+        if alarm['type'] == 'A':
+            GObject.idle_add(btcwidget.alarmmessage.alarm_above_message, alarm, price)
+        else:
+            GObject.idle_add(btcwidget.alarmmessage.alarm_below_message, alarm, price)
+        config['alarms'].remove(alarm)
+        config.save()

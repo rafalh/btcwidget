@@ -1,3 +1,5 @@
+import sys
+
 from gi.repository import Gtk
 
 import btcwidget.currency
@@ -111,7 +113,6 @@ class OptionsDialog(Gtk.Dialog):
             config['graph_interval_sec'] = int(self.graph_interval_entry.get_text())
             config['graph_period_sec'] = int(self.graph_period_entry.get_text())
             config['graph_currency'] = self.graph_currency_combo.get_active_text()
-            print(config['graph_currency'])
             config['dark_theme'] = self.dark_theme_check.get_active()
 
             config['markets'] = []
@@ -134,6 +135,17 @@ class OptionsDialog(Gtk.Dialog):
                 treeiter = self.store.iter_next(treeiter)
 
         except ValueError as e:
-            print(e)  # ignore errors
+            print(e, file=sys.stderr)  # ignore errors
 
         config.save()
+
+
+def open_options_dialog(parent):
+    dialog = OptionsDialog(parent)
+    response = dialog.run()
+    if response == Gtk.ResponseType.OK:
+        dialog.update_config()
+        dialog.destroy()
+        return True
+    dialog.destroy()
+    return False
