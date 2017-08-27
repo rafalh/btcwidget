@@ -1,6 +1,9 @@
-import gi, threading, time
-from gi.repository import GObject, Gtk
-import btcwidget.exchanges, btcwidget.currency
+import threading
+import time
+from gi.repository import GObject
+
+import btcwidget.currency
+import btcwidget.exchanges
 from btcwidget.config import config
 
 

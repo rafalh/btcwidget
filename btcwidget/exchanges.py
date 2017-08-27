@@ -1,6 +1,8 @@
-import time, requests, json
+import math
+import random
+import requests
+import time
 from itertools import groupby
-import random, time, math  # mock
 
 
 class ExchangeProvider:

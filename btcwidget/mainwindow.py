@@ -1,9 +1,13 @@
-import os, time, gi
+import os
+import time
 from gi.repository import Gtk
+
+import btcwidget.currency
+import btcwidget.exchanges
+import btcwidget.graph
 from btcwidget.config import config
-import btcwidget.graph, btcwidget.exchanges, btcwidget.currency
-from btcwidget.optionsdialog import OptionsDialog
 from btcwidget.indicator import Indicator
+from btcwidget.optionsdialog import OptionsDialog
 from definitions import ROOT_DIR
 
 

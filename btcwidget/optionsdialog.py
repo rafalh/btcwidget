@@ -1,9 +1,8 @@
-import os
 from gi.repository import Gtk
-from definitions import ROOT_DIR
-from btcwidget.config import config
-import btcwidget.exchanges
+
 import btcwidget.currency
+import btcwidget.exchanges
+from btcwidget.config import config
 
 
 class OptionsDialog(Gtk.Dialog):
@@ -51,7 +50,6 @@ class OptionsDialog(Gtk.Dialog):
 
         for id in exchange_ids:
             provider = btcwidget.exchanges.factory.get(id)
-            markets = provider.get_markets()
             treeiter = self.store.append(None, [provider.get_name(), None, None, None, id, None])
             for market in provider.get_markets():
                 market_config = market_config_dict.get((id, market), {})

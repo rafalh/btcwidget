@@ -1,5 +1,6 @@
-import json, os
-import btcwidget.exchanges
+import json
+import os
+
 from definitions import ROOT_DIR
 
 _MOCK = False

@@ -1,8 +1,10 @@
-import gi, os
+import gi
+import os
+
+from definitions import ROOT_DIR
 
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, AppIndicator3
-from definitions import ROOT_DIR
 
 
 class Indicator:
