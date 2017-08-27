@@ -9,17 +9,16 @@ from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as Figur
 class Graph(FigureCanvas):
     def __init__(self, dark):
         self.figure = Figure(figsize=(0, 1000), dpi=75, facecolor='w', edgecolor='k')
-        # self.axes = self.figure.add_subplot(111)
-        self.axes = self.figure.add_axes([0.1, 0.1, 0.8, 0.9])
+        self.axes = self.figure.add_axes([0.11, 0.1, 0.78, 0.9])
         self.figure.patch.set_alpha(0)
-        self.axes.margins(0.02, 0.05)
+        self.axes.margins(0, 0.05)
         self.axes.ticklabel_format(useOffset=False)
         self.axes.xaxis.set_major_locator(ticker.MultipleLocator(600))
         self.axes.xaxis.set_major_formatter(ticker.FormatStrFormatter('%ds'))
         if dark:
             self.axes.patch.set_facecolor('black')
         FigureCanvas.__init__(self, self.figure)
-        self.set_size_request(400, 400)
+        self.set_size_request(400, 300)
         self.lines = {}
         self.texts = {}
 
