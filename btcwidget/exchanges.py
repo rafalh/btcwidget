@@ -89,6 +89,7 @@ class BitfinexExchangeProvider(ExchangeProvider):
 
 	def ticker(self, market):
 		resp = requests.get('https://api.bitfinex.com/v2/ticker/t{}'.format(market))
+		resp.raise_for_status()
 		data = resp.json()
 		return data[6] # last price
 
@@ -120,6 +121,7 @@ class BitfinexExchangeProvider(ExchangeProvider):
 		start_ms = (time.time() - period_seconds) * 1000
 		url = 'https://api.bitfinex.com/v2/candles/trade:{}:t{}/hist?start={}&limit={}'.format(period, market, start_ms, resolution)
 		resp = requests.get(url)
+		resp.raise_for_status()
 		data = resp.json()
 		data = [{'time': e[0]/1000, 'open': e[1], 'close': e[2]} for e in data]
 		data = sorted(data, key= lambda e: e['time'])
@@ -140,7 +142,9 @@ class BitstampExchangeProvider(ExchangeProvider):
 		return ['BTCUSD']
 
 	def ticker(self, market):
-		data = requests.get('https://www.bitstamp.net/api/v2/ticker/{}/'.format(market.lower())).json()
+		resp = requests.get('https://www.bitstamp.net/api/v2/ticker/{}/'.format(market.lower()))
+		resp.raise_for_status()
+		data = resp.json()
 		return float(data['last'])
 
 	def graph(self, market, period_seconds, resolution):
@@ -153,6 +157,7 @@ class BitstampExchangeProvider(ExchangeProvider):
 		print('bitstamp.net: getting transactions for {}'.format(time))
 		# there should be some dedicated API...
 		resp = requests.get('https://www.bitstamp.net/api/v2/transactions/{}/?time={}'.format(market.lower(), time))
+		resp.raise_for_status()
 		transactions = resp.json()
 		transactions = sorted(transactions, key= lambda t: int(t['date']))
 		data = []
@@ -192,7 +197,9 @@ class BitBayExchangeProvider(ExchangeProvider):
 		return ['BTCPLN']
 
 	def ticker(self, market):
-		data = requests.get('https://bitbay.net/API/Public/{}/ticker.json'.format(market)).json()
+		resp = requests.get('https://bitbay.net/API/Public/{}/ticker.json'.format(market))
+		resp.raise_for_status()
+		data = resp.json()
 		return float(data['last'])
 
 	def _load_trades(self, market, since_tid = None):
@@ -202,6 +209,7 @@ class BitBayExchangeProvider(ExchangeProvider):
 		else:
 			params['sort'] = 'desc'
 		resp = requests.get('https://bitbay.net/API/Public/{}/trades.json'.format(market), params)
+		resp.raise_for_status()
 		trades = resp.json()
 		tids = [int(t['tid']) for t in trades]
 		timestamps = [int(t['date']) for t in trades]
@@ -270,12 +278,16 @@ class BitMarketExchangeProvider(ExchangeProvider):
 		return ['BTCPLN']
 
 	def ticker(self, market):
-		data = requests.get('https://www.bitmarket.pl/json/{}/ticker.json'.format(market)).json()
+		resp = requests.get('https://www.bitmarket.pl/json/{}/ticker.json'.format(market))
+		resp.raise_for_status()
+		data = resp.json()
 		return data['last']
 
 	def graph(self, market, period_seconds, resolution):
 		period = self._convert_period(period_seconds)
-		data = requests.get('https://www.bitmarket.pl/graphs/{}/{}.json'.format(market, period)).json()
+		resp = requests.get('https://www.bitmarket.pl/graphs/{}/{}.json'.format(market, period))
+		resp.raise_for_status()
+		data = resp.json()
 		timestamps = [e['time'] for e in data]
 		max_time = max(timestamps)
 		min_time = max_time - period_seconds

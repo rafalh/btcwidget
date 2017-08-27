@@ -20,8 +20,9 @@ class _CurrencyService:
 
 	def _load(self):
 		print("Fetching currency exchange rates...")
-		repl = requests.get('http://api.fixer.io/latest')
-		self._data = repl.json()
+		resp = requests.get('http://api.fixer.io/latest')
+		resp.raise_for_status()
+		self._data = resp.json()
 		self._data['fetch_date'] = self._get_current_date()
 		data_json = json.dumps(self._data, indent=4)
 		with open(self._CACHE_PATH, 'w') as file:

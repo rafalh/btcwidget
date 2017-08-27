@@ -20,7 +20,10 @@ class UpdateThread(threading.Thread):
 
 	def _update_tickers(self):
 		for i, market_config in enumerate(config['markets']):
-			self._update_market_ticker(i)
+			try:
+				self._update_market_ticker(i)
+			except Exception as e:
+				print('Failed to update ticker data for {}: {}'.format(market_config['exchange'], e))
 
 	def _update_graph(self):
 		now = time.time()
@@ -31,7 +34,11 @@ class UpdateThread(threading.Thread):
 		for i, market_config in enumerate(config['markets']):
 			if market_config['graph']:
 				if update_graph:
-					self._update_market_graph_data(i)
+					try:
+						self._update_market_graph_data(i)
+					except Exception as e:
+						print('Failed to update graph data for {}: {}'.format(market_config['exchange'], e))
+					
 				if i in self._graph_data_dict:
 					graph_data = self._graph_data_dict[i]
 					GObject.idle_add(self._main_win.set_graph_data, i, graph_data)
