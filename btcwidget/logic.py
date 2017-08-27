@@ -1,6 +1,6 @@
 import gi, threading, time
 from gi.repository import GObject, Gtk
-import btcwidget.exchanges
+import btcwidget.exchanges, btcwidget.currency
 from btcwidget.config import config
 
 class UpdateThread(threading.Thread):
@@ -49,7 +49,7 @@ class UpdateThread(threading.Thread):
 		exchange, market = market_config['exchange'], market_config['market']
 		provider = btcwidget.exchanges.factory.get(exchange)
 		price = provider.ticker(market)
-		price_str = provider.format_price(price, market)
+		price_str = btcwidget.currency.service.format_price(price, market[3:])
 		print('{} {} ticker: {}'.format(provider.get_name(), market, price_str))
 		GObject.idle_add(self._main_win.set_current_price, market_index, price_str)
 

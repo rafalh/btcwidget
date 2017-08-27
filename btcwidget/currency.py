@@ -40,4 +40,10 @@ class _CurrencyService:
 	def list(self):
 		return [self._data['base']] + list(self._data['rates'].keys())
 
+	def format_price(self, price, currency):
+		if currency == 'USD':
+			return '${:.2f}'.format(price)
+		else:
+			return '{:.2f} {}'.format(price, currency)
+
 service = _CurrencyService()

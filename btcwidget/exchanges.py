@@ -7,11 +7,12 @@ class ExchangeProvider:
 	"""Exchange data provider interface"""
 
 	def get_name(self):
-		"""Returns exchange name"""
+		"""Returns exchange name for use in user interface"""
 		raise NotImplementedError()
 
 	def get_markets(self):
-		"""Returns list of supported market codes"""
+		"""Returns list of supported market codes.
+		Each 6-letters code is built from two ISO 4217 currency codes used for trading."""
 		raise NotImplementedError()
 
 	def ticker(self, market):
@@ -19,11 +20,8 @@ class ExchangeProvider:
 		raise NotImplementedError()
 
 	def graph(self, market, period_seconds, resolution):
-		"""Returns price list for given period"""
-		raise NotImplementedError()
-
-	def format_price(self, price, market):
-		"""Formats price for given market adding currency symbol"""
+		"""Returns graph data for given period. Graph data is list of dicts with keys:
+		'time' (UTC timestamp), 'open' (open price), 'close' (close price)."""
 		raise NotImplementedError()
 
 
@@ -72,9 +70,6 @@ class MockProvider:
 			}
 			data.append(entry)
 		return data
-	
-	def format_price(self, price, market):
-		return '${:.2f}'.format(price)
 
 
 class BitfinexExchangeProvider(ExchangeProvider):
@@ -127,9 +122,6 @@ class BitfinexExchangeProvider(ExchangeProvider):
 		data = sorted(data, key= lambda e: e['time'])
 		return data
 
-	def format_price(self, price, market):
-		return '${:.2f}'.format(price)
-
 
 class BitstampExchangeProvider(ExchangeProvider):
 
@@ -174,9 +166,6 @@ class BitstampExchangeProvider(ExchangeProvider):
 				e['close'] = float(gt[-1]['price'])
 			data.append(e)
 		return data
-
-	def format_price(self, price, market):
-		return '${:.2f}'.format(price)
 
 
 class BitBayExchangeProvider(ExchangeProvider):
@@ -263,9 +252,6 @@ class BitBayExchangeProvider(ExchangeProvider):
 
 		return data
 
-	def format_price(self, price, market):
-		return '{:.2f} PLN'.format(price)
-
 
 class BitMarketExchangeProvider(ExchangeProvider):
 	
@@ -293,9 +279,6 @@ class BitMarketExchangeProvider(ExchangeProvider):
 		min_time = max_time - period_seconds
 		data = [self._convert_graph_entry(e) for e in data if e['time'] > min_time]
 		return data
-
-	def format_price(self, price, market):
-		return '{:.2f} PLN'.format(price)
 
 	def _convert_period(self, period_seconds):
 		m = 60
