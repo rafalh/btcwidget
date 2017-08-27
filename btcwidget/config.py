@@ -45,7 +45,10 @@ class _Config(dict):
         # time axis in minutes
         'time_axis_div': 1,
         'dark_theme': False,
-        'markets': _DEFAULT_MARKETS
+        'markets': _DEFAULT_MARKETS,
+        'alarm_currency': 'USD',
+        'alarm_above': None,
+        'alarm_below': None,
     }
 
     CONFIG_PATH = os.path.join(ROOT_DIR, 'config.json')

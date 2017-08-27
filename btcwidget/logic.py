@@ -4,6 +4,7 @@ from gi.repository import GObject
 
 import btcwidget.currency
 import btcwidget.exchanges
+import btcwidget.alarmmessage
 from btcwidget.config import config
 
 
@@ -52,6 +53,7 @@ class UpdateThread(threading.Thread):
         exchange, market = market_config['exchange'], market_config['market']
         provider = btcwidget.exchanges.factory.get(exchange)
         price = provider.ticker(market)
+        self._check_alarm(price, market[3:])
         price_str = btcwidget.currency.service.format_price(price, market[3:])
         print('{} {} ticker: {}'.format(provider.get_name(), market, price_str))
         GObject.idle_add(self._main_win.set_current_price, market_index, price_str)
@@ -75,3 +77,17 @@ class UpdateThread(threading.Thread):
     def clear(self):
         self._last_graph_update = 0
         self._graph_data_dict = {}
+
+    def _check_alarm(self, price, currency):
+        changed_config = False
+        converted = btcwidget.currency.service.convert(price, currency, config['alarm_currency'])
+        if config['alarm_above'] and converted >= config['alarm_above']:
+            GObject.idle_add(btcwidget.alarmmessage.alarm_above_message, price, config['alarm_above'], currency)
+            config['alarm_above'] = None
+            changed_config = True
+        if config['alarm_below'] and converted <= config['alarm_below']:
+            GObject.idle_add(btcwidget.alarmmessage.alarm_below_message, price, config['alarm_below'], currency)
+            config['alarm_below'] = None
+            changed_config = True
+        if changed_config:
+            config.save()

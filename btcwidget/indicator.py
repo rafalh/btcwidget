@@ -2,6 +2,7 @@ import gi
 import os
 
 from definitions import ROOT_DIR
+from btcwidget.alarmdialog import AlarmDialog
 
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import Gtk, AppIndicator3
@@ -32,6 +33,10 @@ class Indicator:
         options_menu_item.connect('activate', self._on_options_item_activate)
         menu.append(options_menu_item)
 
+        alarm_menu_item = Gtk.MenuItem("Alarm...")
+        alarm_menu_item.connect('activate', self._on_alarm_item_activate)
+        menu.append(alarm_menu_item)
+
         quit_menu_item = Gtk.MenuItem("Quit")
         quit_menu_item.connect('activate', Gtk.main_quit)
         menu.append(quit_menu_item)
@@ -48,3 +53,10 @@ class Indicator:
 
     def _on_options_item_activate(self, widget):
         self._main_win.open_options()
+
+    def _on_alarm_item_activate(self, widget):
+        dialog = AlarmDialog(None)
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            dialog.update_config()
+        dialog.destroy()
