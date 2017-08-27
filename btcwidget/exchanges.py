@@ -77,6 +77,58 @@ class MockProvider:
 		return '${:.2f}'.format(price)
 
 
+class BitfinexExchangeProvider(ExchangeProvider):
+
+	ID = 'bitfinex.com'
+
+	def get_name(self):
+		return "Bitfinex.com"
+
+	def get_markets(self):
+		return ['BTCUSD']
+
+	def ticker(self, market):
+		resp = requests.get('https://api.bitfinex.com/v2/ticker/t{}'.format(market))
+		data = resp.json()
+		return data[6] # last price
+
+	def _convert_period(self, period_seconds):
+		# Available values: '1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '7D', '14D', '1M'
+		m = 60
+		h = 60*m
+		d = 24*h
+		periods = [
+			(1*m,  '1m'),
+			(5*m,  '5m'),
+			(15*m, '15m'),
+			(30*m, '30m'),
+			(1*h,  '1h'),
+			(3*h,  '3h'),
+			(6*h,  '6h'),
+			(12*h, '12h'),
+			(1*d,  '1D'),
+			(7*d,  '7D'),
+			(14*d, '14D'),
+			(None, '1M'),
+		]
+		for sec, code in periods:
+			if not sec or sec >= period_seconds:
+				return code
+
+	def graph(self, market, period_seconds, resolution):
+		period = self._convert_period(period_seconds / 100)
+		start_ms = (time.time() - period_seconds) * 1000
+		url = 'https://api.bitfinex.com/v2/candles/trade:{}:t{}/hist?start={}&limit={}'.format(period, market, start_ms, resolution)
+		resp = requests.get(url)
+		data = resp.json()
+		data = [{'time': e[0]/1000, 'open': e[1], 'close': e[2]} for e in data]
+		data = sorted(data, key= lambda e: e['time'])
+		return data
+
+	def format_price(self, price, market):
+		return '${:.2f}'.format(price)
+
+
 class BitstampExchangeProvider(ExchangeProvider):
 
 	ID = 'bitstamp.net'
@@ -171,7 +223,6 @@ class BitBayExchangeProvider(ExchangeProvider):
 			min_tid, max_tid = self._load_trades(market, since_tid)
 			since_tid = max_tid
 
-
 	def _load_trades_since_time(self, market, since_time):
 		# get newest
 		self._load_trades(market, self._max_tid)
@@ -263,56 +314,6 @@ class BitMarketExchangeProvider(ExchangeProvider):
 			'close': float(e['close']),
 		}
 
-class BitfinexExchangeProvider(ExchangeProvider):
-
-	ID = 'bitfinex.com'
-
-	def get_name(self):
-		return "Bitfinex.com"
-
-	def get_markets(self):
-		return ['BTCUSD']
-
-	def ticker(self, market):
-		resp = requests.get('https://api.bitfinex.com/v2/ticker/t{}'.format(market))
-		data = resp.json()
-		return data[6] # last price
-
-	def _convert_period(self, period_seconds):
-		# Available values: '1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '7D', '14D', '1M'
-		m = 60
-		h = 60*m
-		d = 24*h
-		periods = [
-			(1*m,  '1m'),
-			(5*m,  '5m'),
-			(15*m, '15m'),
-			(30*m, '30m'),
-			(1*h,  '1h'),
-			(3*h,  '3h'),
-			(6*h,  '6h'),
-			(12*h, '12h'),
-			(1*d,  '1D'),
-			(7*d,  '7D'),
-			(14*d, '14D'),
-			(None, '1M'),
-		]
-		for sec, code in periods:
-			if not sec or sec >= period_seconds:
-				return code
-
-	def graph(self, market, period_seconds, resolution):
-		period = self._convert_period(period_seconds / 100)
-		start_ms = (time.time() - period_seconds) * 1000
-		url = 'https://api.bitfinex.com/v2/candles/trade:{}:t{}/hist?start={}&limit={}'.format(period, market, start_ms, resolution)
-		resp = requests.get(url)
-		data = resp.json()
-		data = [{'time': e[0]/1000, 'open': e[1], 'close': e[2]} for e in data]
-		data = sorted(data, key= lambda e: e['time'])
-		return data
-
-	def format_price(self, price, market):
-		return '${:.2f}'.format(price)
 
 class _ExchangeProviderFactory:
 

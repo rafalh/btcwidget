@@ -19,28 +19,14 @@ class _Config(dict):
 	else:
 		_DEFAULT_MARKETS = [
 			{
-				'exchange': 'bitstamp.net',
+				'exchange': 'bitfinex.com',
 				'market': 'BTCUSD',
-				'ticker': True,
-				'graph': True,
-				'indicator': False,
-			},
-			{
-				'exchange': 'bitmarket.pl',
-				'market': 'BTCPLN',
 				'ticker': True,
 				'graph': True,
 				'indicator': True,
 			},
 			{
-				'exchange': 'bitbay.net',
-				'market': 'BTCPLN',
-				'ticker': True,
-				'graph': False,
-				'indicator': False,
-			},
-			{
-				'exchange': 'bitfinex.com',
+				'exchange': 'bitstamp.net',
 				'market': 'BTCUSD',
 				'ticker': True,
 				'graph': True,
