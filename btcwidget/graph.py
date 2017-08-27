@@ -37,6 +37,8 @@ class Graph(FigureCanvas):
         else:
             line, text = self.lines[index], self.texts[index]
             line.set_data(x, y)
+            self.axes.relim()
+            self.axes.autoscale_view()
             text.set_position((x[-1], y[-1]))
             text.set_text(price_text)
         self.draw()
