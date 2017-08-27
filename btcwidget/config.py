@@ -3,7 +3,6 @@ import btcwidget.exchanges
 from definitions import ROOT_DIR
 
 _MOCK = False
-_USD_PLN = 3.61104691 # 25.08.2017
 
 class _Config(dict):
 
@@ -25,7 +24,6 @@ class _Config(dict):
 				'ticker': True,
 				'graph': True,
 				'indicator': False,
-				'graph_price_mult': _USD_PLN,
 			},
 			{
 				'exchange': 'bitmarket.pl',
@@ -47,7 +45,6 @@ class _Config(dict):
 				'ticker': True,
 				'graph': True,
 				'indicator': False,
-				'graph_price_mult': _USD_PLN,
 			},
 		]
 
@@ -57,6 +54,7 @@ class _Config(dict):
 		# show last 60 minutes
 		'graph_period_sec': 60*60,
 		'graph_res': 200,
+		'graph_currency': 'USD',
 		# time axis in minutes
 		'time_axis_div': 1,
 		'dark_theme': False,

@@ -24,6 +24,8 @@ class Graph(FigureCanvas):
 		self.texts = {}
 
 	def set_data(self, index, x, y, color):
+		if len(y) == 0:
+			return
 		price_text = '{:.2f}'.format(y[-1])
 		if not index in self.lines:
 			line, = self.axes.plot(x, y, color=color)

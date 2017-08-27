@@ -3,6 +3,7 @@ from gi.repository import Gtk
 from definitions import ROOT_DIR
 from btcwidget.config import config
 import btcwidget.exchanges
+import btcwidget.currency
 
 
 class OptionsDialog(Gtk.Dialog):
@@ -11,9 +12,8 @@ class OptionsDialog(Gtk.Dialog):
 	_TICKER_COL = 1
 	_GRAPH_COL = 2
 	_INDICATOR_COL = 3
-	_PRICE_MULT_COL = 4
-	_EXCHANGE_COL = 5
-	_MARKET_COL = 6
+	_EXCHANGE_COL = 4
+	_MARKET_COL = 5
 
 	def __init__(self, parent):
 		Gtk.Dialog.__init__(self, "Options", parent, 0,
@@ -30,11 +30,20 @@ class OptionsDialog(Gtk.Dialog):
 
 		self.graph_period_entry = Gtk.Entry(text=str(config['graph_period_sec']))
 		self._add_label_and_widget("Graph Period (sec.):", self.graph_period_entry)
+		
+		self.graph_currency_combo = Gtk.ComboBoxText()
+		self.graph_currency_combo.set_entry_text_column(0)
+		currencies = sorted(btcwidget.currency.service.list())
+		for i, currency in enumerate(currencies):
+			self.graph_currency_combo.append_text(currency)
+			if currency == config['graph_currency']:
+				self.graph_currency_combo.set_active(i)
+		self._add_label_and_widget("Graph Currency:", self.graph_currency_combo)
 
 		self.dark_theme_check = Gtk.CheckButton("Dark Theme", active=config['dark_theme'])
 		box.add(self.dark_theme_check)
 
-		self.store = Gtk.TreeStore(str, bool, bool, bool, float, str, str)
+		self.store = Gtk.TreeStore(str, bool, bool, bool, str, str)
 
 		exchange_ids = btcwidget.exchanges.factory.list()
 		market_config_dict = {}
@@ -44,15 +53,13 @@ class OptionsDialog(Gtk.Dialog):
 		for id in exchange_ids:
 			provider = btcwidget.exchanges.factory.get(id)
 			markets = provider.get_markets()
-			treeiter = self.store.append(None, [provider.get_name(), None, None, None, None, id, None])
+			treeiter = self.store.append(None, [provider.get_name(), None, None, None, id, None])
 			for market in provider.get_markets():
 				market_config = market_config_dict.get((id, market), {})
 				ticker = market_config.get('ticker', False)
 				graph = market_config.get('graph', False)
 				indicator = market_config.get('indicator', False)
-				graph_price_mult = market_config.get('graph_price_mult', 1)
-
-				self.store.append(treeiter, [market, ticker, graph, indicator, graph_price_mult, id, market])
+				self.store.append(treeiter, [market, ticker, graph, indicator, id, market])
 		tree = Gtk.TreeView(self.store)
 
 		renderer = Gtk.CellRendererText()
@@ -74,12 +81,6 @@ class OptionsDialog(Gtk.Dialog):
 		tree.append_column(column)
 		renderer.connect("toggled", self._on_toggle_indicator)
 
-		renderer = Gtk.CellRendererText()
-		column = Gtk.TreeViewColumn("Price Multiplier", renderer, text=self._PRICE_MULT_COL)
-		tree.append_column(column)
-		renderer.set_property("editable", True)
-		renderer.connect("edited", self._on_price_mult_edited)
-
 		tree.expand_all()
 		box.add(tree)
 
@@ -100,18 +101,10 @@ class OptionsDialog(Gtk.Dialog):
 		if self.store[treeiter][self._MARKET_COL]:
 			self.store[treeiter][self._INDICATOR_COL] = not self.store[treeiter][self._INDICATOR_COL]
 
-	def _on_price_mult_edited(self, renderer, path, text):
-		treeiter = self.store.get_iter(path)
-		if self.store[treeiter][self._MARKET_COL]:
-			try:
-				self.store[treeiter][self._PRICE_MULT_COL] = float(text)
-			except ValueError as e:
-				print(e) # ignore error
-
 	def _add_label_and_widget(self, label_text, widget):
 		hbox = Gtk.Box(spacing=6)
 		label = Gtk.Label(label_text)
-		hbox.pack_start(label, True, True, 0)
+		hbox.pack_start(label, False, False, 0)
 		hbox.pack_start(widget, True, True, 0)
 		self.get_content_area().add(hbox)
 
@@ -120,6 +113,8 @@ class OptionsDialog(Gtk.Dialog):
 			config['update_interval_sec'] = int(self.update_interval_entry.get_text())
 			config['graph_interval_sec'] = int(self.graph_interval_entry.get_text())
 			config['graph_period_sec'] = int(self.graph_period_entry.get_text())
+			config['graph_currency'] = self.graph_currency_combo.get_active_text()
+			print(config['graph_currency'])
 			config['dark_theme'] = self.dark_theme_check.get_active()
 
 			config['markets'] = []
@@ -135,7 +130,6 @@ class OptionsDialog(Gtk.Dialog):
 							'ticker': row[self._TICKER_COL],
 							'graph': row[self._GRAPH_COL],
 							'indicator': row[self._INDICATOR_COL],
-							'graph_price_mult': float(row[self._PRICE_MULT_COL]),
 						}
 						if market_config['ticker'] or market_config['graph'] or market_config['indicator']:
 							config['markets'].append(market_config)

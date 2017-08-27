@@ -1,7 +1,7 @@
 import os, time, gi
 from gi.repository import Gtk
 from btcwidget.config import config
-import btcwidget.graph, btcwidget.exchanges
+import btcwidget.graph, btcwidget.exchanges, btcwidget.currency
 from btcwidget.optionsdialog import OptionsDialog
 from btcwidget.indicator import Indicator
 from definitions import ROOT_DIR
@@ -34,7 +34,7 @@ class MainWindow(Gtk.Window):
 		self.show_all()
 
 		self._indicator = Indicator(self)
-		#self.open_options_window(None)
+		#self.open_options()
 
 	def _create_ticker_labels(self):
 		self._tickers_vbox.forall(lambda w: w.destroy())
@@ -84,7 +84,10 @@ class MainWindow(Gtk.Window):
 
 	def set_graph_data(self, i, graph_data):
 		now = time.time()
-		graph_price_mult = config['markets'][i].get('graph_price_mult', 1)
+		market = config['markets'][i]['market']
+		market_currency = market[3:]
+		graph_currency = config['graph_currency']
+		graph_price_mult = btcwidget.currency.service.convert(1, market_currency, graph_currency)
 		x = [int((e['time'] - now) / config['time_axis_div']) for e in graph_data]
 		y = [float(e['close']) * graph_price_mult for e in graph_data]
 		self._graph.set_data(i, x, y, self._get_color(i))

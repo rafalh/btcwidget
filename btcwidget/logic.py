@@ -63,6 +63,5 @@ class UpdateThread(threading.Thread):
 		self._graph_data_dict[market_index] = graph_data
 
 	def clear(self):
-		print('clear')
 		self._last_graph_update = 0
 		self._graph_data_dict = {}
