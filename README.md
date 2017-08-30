@@ -25,6 +25,22 @@ Install dependencies first:
 
 	sudo apt-get install python3 python3-gi python3-matplotlib
 
+
+If you are getting error related to lack of indicator:
+
+    Namespace AppIndicator3 not available
+
+You must install following library by running this command:
+
+    apt-get install gir1.2-appindicator3-0.1
+
+This error will probably appear for environments without AppIndicator available (Gnome Shell)
+
+Additionally for gnome shell you must install and enable following extension allowing to add AppIndicators:
+
+    KStatusNotifierItem/AppIndicator Support
+
+
 Then you can run the application:
 
 	btcwidget/main.py
