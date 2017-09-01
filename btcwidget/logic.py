@@ -15,6 +15,7 @@ class UpdateThread(threading.Thread):
         self._main_win = main_win
         self._last_graph_update = 0
         self._graph_data_dict = {}
+        self._last_ticer = {}
         config.register_change_callback(self.clear)
 
     def run(self):
@@ -61,13 +62,14 @@ class UpdateThread(threading.Thread):
 
         self._check_alarms(exchange, market, price)
 
+        self._last_ticer[market_index] = {
+            'time': now,
+            'open': price,
+            'close': price,
+        }
         if market_index in self._graph_data_dict:
             graph_data = self._graph_data_dict[market_index]
-            graph_data.append({
-                'time': now,
-                'open': price,
-                'close': price,
-            })
+            graph_data.append(self._last_ticer[market_index])
             graph_since_time = now - config['graph_period_sec']
             self._graph_data_dict[market_index] = [t for t in graph_data if t['time'] > graph_since_time]
 
@@ -77,12 +79,15 @@ class UpdateThread(threading.Thread):
         exchange, market = market_config['exchange'], market_config['market']
         provider = btcwidget.exchanges.factory.get(exchange)
         graph_data = provider.graph(market, config['graph_period_sec'], config['graph_res'])
+        if market_index in self._last_ticer:
+            graph_data.append(self._last_ticer[market_index])
         graph_data = [t for t in graph_data if t['time'] > now - config['graph_period_sec']]
         self._graph_data_dict[market_index] = graph_data
 
     def clear(self):
         self._last_graph_update = 0
         self._graph_data_dict = {}
+        self._last_ticer = {}
 
     def _check_alarms(self, exchange, market, price):
         for alarm in config['alarms']:
