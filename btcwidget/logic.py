@@ -65,8 +65,11 @@ class UpdateThread(threading.Thread):
             graph_data = self._graph_data_dict[market_index]
             graph_data.append({
                 'time': now,
+                'open': price,
                 'close': price,
             })
+            graph_since_time = now - config['graph_period_sec']
+            self._graph_data_dict[market_index] = [t for t in graph_data if t['time'] > graph_since_time]
 
     def _update_market_graph_data(self, market_index):
         now = time.time()
