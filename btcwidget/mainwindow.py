@@ -5,7 +5,7 @@ from gi.repository import Gtk
 import btcwidget.currency
 import btcwidget.exchanges
 import btcwidget.graph
-from btcwidget.config import config
+from btcwidget.config import config, get_market_id
 from btcwidget.indicator import Indicator
 from btcwidget.optionsdialog import open_options_dialog
 from definitions import ROOT_DIR
@@ -47,28 +47,30 @@ class MainWindow(Gtk.Window):
 
         for i, market_config in enumerate(config['markets']):
             if market_config['ticker']:
+                market_id = get_market_id(market_config)
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
                 exchange, market = market_config['exchange'], market_config['market']
                 provider = btcwidget.exchanges.factory.get(exchange)
                 market_name = '{} - {}:'.format(provider.get_name(), market)
-                color = self._get_color(i)
                 name_label = Gtk.Label(market_name)
+                color = self._get_color(i)
                 name_label.set_markup('<span color="{}">{}</span>'.format(color, market_name))
                 name_label.set_size_request(150, 10)
                 name_label.set_alignment(0, 0.5)
                 hbox.pack_start(name_label, False, False, 10)
                 price_label = Gtk.Label()
                 hbox.pack_start(price_label, False, False, 10)
-                self._ticker_labels[i] = price_label
+                self._ticker_labels[market_id] = price_label
+                price_label.get_parent()
                 self._tickers_vbox.pack_start(hbox, True, True, 2)
 
         self._tickers_vbox.show_all()
 
-    def set_current_price(self, i, price_str):
+    def set_current_price(self, market_id, price_str):
+        market_config, i = config.get_market_by_id(market_id)
         price_html = '<span color="{}">{}</span>'.format(self._get_color(i), price_str)
-        if i in self._ticker_labels:
-            self._ticker_labels[i].set_markup(price_html)
-        market_config = config['markets'][i]
+        if market_id in self._ticker_labels:
+            self._ticker_labels[market_id].set_markup(price_html)
         if market_config['indicator']:
             self.set_title(price_str)
             self._indicator.set_current_price(price_str)
@@ -80,18 +82,21 @@ class MainWindow(Gtk.Window):
     def _on_config_change(self):
         self._graph.set_dark(config['dark_theme'])
         self._create_ticker_labels()
-        self._graph.clear()
         config.run_change_callbacks()
 
-    def set_graph_data(self, i, graph_data):
+    def remove_graph_markets(self, graph_markets):
+        self._graph.remove_markets(graph_markets)
+
+    def set_graph_data(self, market_id, graph_data):
         now = time.time()
-        market = config['markets'][i]['market']
+        market_config, i = config.get_market_by_id(market_id)
+        market = market_config['market']
         market_currency = market[3:]
         graph_currency = config['graph_currency']
         graph_price_mult = btcwidget.currency.service.convert(1, market_currency, graph_currency)
         x = [int((e['time'] - now) / config['time_axis_div']) for e in graph_data]
         y = [float(e['close']) * graph_price_mult for e in graph_data]
-        self._graph.set_data(i, x, y, self._get_color(i))
+        self._graph.set_data(market_id, x, y, self._get_color(i))
 
     def _get_color(self, i):
         return self._COLORS[i % len(self._COLORS)]

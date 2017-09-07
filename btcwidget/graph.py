@@ -36,14 +36,15 @@ class Graph(FigureCanvas):
         self.lines = {}
         self.texts = {}
 
-    def set_data(self, index, x, y, color):
+    def set_data(self, market_id, x, y, color):
         if len(y) == 0:
             return
-        if not index in self.lines:
+        if not market_id in self.lines:
             line, = self.axes.plot(x, y, color=color)
-            self.lines[index] = line
+            self.lines[market_id] = line
         else:
-            line = self.lines[index]
+            line = self.lines[market_id]
+            line.set_color(color)
             line.set_data(x, y)
 
         self.axes.relim()
@@ -53,15 +54,16 @@ class Graph(FigureCanvas):
         xsize = xmax - xmin
         text_x, text_y = xmax+xsize*0.01, y[-1]
 
-        if not index in self.texts:
+        if not market_id in self.texts:
             text = self.axes.text(text_x, text_y, price_text, color='w', size='x-small')
-            text.set_bbox(dict(facecolor=line.get_color(), edgecolor='none', alpha=0.5))
+            text.set_bbox(dict(facecolor=color, edgecolor='none', alpha=0.5))
             text.set_ha('left')
-            self.texts[index] = text
+            self.texts[market_id] = text
         else:
-            text = self.texts[index]
+            text = self.texts[market_id]
             text.set_y(text_y)
             text.set_text(price_text)
+            text.get_bbox_patch().set_facecolor(color)
 
         for i in self.texts:
             self.texts[i].set_x(text_x)
@@ -75,11 +77,9 @@ class Graph(FigureCanvas):
         else:
             self.axes.patch.set_facecolor('white')
 
-    def clear(self):
-        for i in self.lines:
-            self.axes.lines.remove(self.lines[i])
-        for i in self.texts:
-            self.axes.texts.remove(self.texts[i])
-        self.lines = {}
-        self.texts = {}
+    def remove_markets(self, id_list):
+        for market_id in id_list:
+            if market_id in self.lines:
+                self.axes.lines.remove(self.lines[market_id])
+                self.axes.texts.remove(self.texts[market_id])
         self.draw()

@@ -80,5 +80,16 @@ class _Config(dict):
         for func in self._callbacks:
             func()
 
+    def get_market_by_id(self, market_id):
+        markets = self['markets']
+        for i, market_config in enumerate(markets):
+            if market_id == get_market_id(market_config):
+                return market_config, i
+        return None
+
+
+def get_market_id(market_config):
+    return '{}/{}'.format(market_config['exchange'], market_config['market'])
+
 
 config = _Config()
