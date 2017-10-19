@@ -306,6 +306,37 @@ class BitMarketExchangeProvider(ExchangeProvider):
             'close': float(e['close']),
         }
 
+class LakeBTCExchangeProvider(ExchangeProvider):
+    ID = 'lakebtc.com'
+
+    def get_name(self):
+        return "LakeBTC.com"
+
+    def get_markets(self):
+        return ['BTCUSD']
+
+    def ticker(self, market):
+        resp = requests.get('https://api.LakeBTC.com/api_v2/ticker')
+        resp.raise_for_status()
+        data = resp.json()
+        return float(data['btcusd']['last'])
+
+    def graph(self, market, period_seconds, resolution):
+        resp = requests.get('https://api.lakebtc.com/api_v2/bctrades?symbol=btcusd'.format(market.lower()))
+        resp.raise_for_status()
+        data = resp.json()
+        timestamps = [e['date'] for e in data]
+        max_time = max(timestamps)
+        min_time = max_time - period_seconds
+        data = [self._convert_graph_entry(e) for e in data if e['date'] > min_time]
+        return data
+
+    def _convert_graph_entry(self, e):
+        return {
+            'time': e['date'],
+            'open': float(e['price']),
+            'close': float(e['price']),
+        }
 
 class _ExchangeProviderFactory:
     def __init__(self):
@@ -320,6 +351,8 @@ class _ExchangeProviderFactory:
             return BitstampExchangeProvider()
         elif id == BitfinexExchangeProvider.ID:
             return BitfinexExchangeProvider()
+        elif id == LakeBTCExchangeProvider.ID:
+            return LakeBTCExchangeProvider()
         elif id == MockProvider.ID:
             return MockProvider()
         else:
@@ -336,6 +369,7 @@ class _ExchangeProviderFactory:
             BitMarketExchangeProvider.ID,
             BitstampExchangeProvider.ID,
             BitfinexExchangeProvider.ID,
+            LakeBTCExchangeProvider.ID
         ]
 
 

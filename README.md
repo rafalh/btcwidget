@@ -13,6 +13,7 @@ It currently supports following exchanges:
 * Bitstamp.net (BTCUSD)
 * BitMarket.pl (BTCPLN)
 * BitBay.net (BTCPLN)
+* LakeBTC.com (BTCUSD)
 
 Application consist of Appindicator displaying current price in Tray area and window showing chart from last 24 hours.
 
