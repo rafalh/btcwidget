@@ -1,6 +1,8 @@
-import time, requests, json
+import math
+import random
+import requests
+import time
 from itertools import groupby
-import random, time, math  # mock
 
 
 class ExchangeProvider:
@@ -360,7 +362,7 @@ class _ExchangeProviderFactory:
 
     def get(self, id):
         if id not in self._cache:
-            return self._create(id)
+            self._cache[id] = self._create(id)
         return self._cache[id]
 
     def list(self):

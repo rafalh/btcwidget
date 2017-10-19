@@ -1,9 +1,10 @@
-import os
+import sys
+
 from gi.repository import Gtk
-from definitions import ROOT_DIR
-from btcwidget.config import config
-import btcwidget.exchanges
+
 import btcwidget.currency
+import btcwidget.exchanges
+from btcwidget.config import config
 
 
 class OptionsDialog(Gtk.Dialog):
@@ -51,7 +52,6 @@ class OptionsDialog(Gtk.Dialog):
 
         for id in exchange_ids:
             provider = btcwidget.exchanges.factory.get(id)
-            markets = provider.get_markets()
             treeiter = self.store.append(None, [provider.get_name(), None, None, None, id, None])
             for market in provider.get_markets():
                 market_config = market_config_dict.get((id, market), {})
@@ -113,7 +113,6 @@ class OptionsDialog(Gtk.Dialog):
             config['graph_interval_sec'] = int(self.graph_interval_entry.get_text())
             config['graph_period_sec'] = int(self.graph_period_entry.get_text())
             config['graph_currency'] = self.graph_currency_combo.get_active_text()
-            print(config['graph_currency'])
             config['dark_theme'] = self.dark_theme_check.get_active()
 
             config['markets'] = []
@@ -136,6 +135,17 @@ class OptionsDialog(Gtk.Dialog):
                 treeiter = self.store.iter_next(treeiter)
 
         except ValueError as e:
-            print(e)  # ignore errors
+            print(e, file=sys.stderr)  # ignore errors
 
         config.save()
+
+
+def open_options_dialog(parent):
+    dialog = OptionsDialog(parent)
+    response = dialog.run()
+    if response == Gtk.ResponseType.OK:
+        dialog.update_config()
+        dialog.destroy()
+        return True
+    dialog.destroy()
+    return False

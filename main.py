@@ -3,6 +3,7 @@ import gi, signal
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import GObject, Gtk
+
 from btcwidget.mainwindow import MainWindow
 from btcwidget.logic import UpdateThread
 from btcwidget.config import config

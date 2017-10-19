@@ -1,5 +1,6 @@
-import json, os
-import btcwidget.exchanges
+import json
+import os
+
 from definitions import ROOT_DIR
 
 _MOCK = False
@@ -44,7 +45,11 @@ class _Config(dict):
         # time axis in minutes
         'time_axis_div': 1,
         'dark_theme': False,
-        'markets': _DEFAULT_MARKETS
+        'markets': _DEFAULT_MARKETS,
+        'alarm_currency': 'USD',
+        'alarm_above': None,
+        'alarm_below': None,
+        'alarms': [],
     }
 
     CONFIG_PATH = os.path.join(ROOT_DIR, 'config.json')
@@ -74,6 +79,17 @@ class _Config(dict):
     def run_change_callbacks(self):
         for func in self._callbacks:
             func()
+
+    def get_market_by_id(self, market_id):
+        markets = self['markets']
+        for i, market_config in enumerate(markets):
+            if market_id == get_market_id(market_config):
+                return market_config, i
+        return None
+
+
+def get_market_id(market_config):
+    return '{}/{}'.format(market_config['exchange'], market_config['market'])
 
 
 config = _Config()

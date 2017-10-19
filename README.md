@@ -15,16 +15,18 @@ It currently supports following exchanges:
 * BitBay.net (BTCPLN)
 * LakeBTC.com (BTCUSD)
 
-Application consist of Appindicator displaying current price in Tray area and window showing chart from last 24 hours.
+Application consist of AppIndicator displaying current price in Tray area and main window showing chart from last hour.
 
 Application was developed with Linux in mind but should work on any system with GTK and Python installed.
-Tested it only on Ubuntu 16.04 (Unity) and Linux Mint 18 (Cinnamon).
+It was tested Ubuntu 16.04 (Unity), Linux Mint 18 (Cinnamon) and Debian (GNOME Shell).
 
 Usage
 -----
-Install dependencies first:
+Install dependencies first. On Debian-based distributions you can do it with command:
 
-	sudo apt-get install python3 python3-gi python3-matplotlib
+	sudo apt-get install python3 python3-gi python3-matplotlib gir1.2-appindicator3-0.1
+
+On GNOME Shell you should also install and enable extension "KStatusNotifierItem/AppIndicator Support" to get indicator working.
 
 
 If you are getting error related to lack of indicator:
