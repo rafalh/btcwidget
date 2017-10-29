@@ -13,7 +13,6 @@ It currently supports following exchanges:
 * Bitstamp.net (BTCUSD)
 * BitMarket.pl (BTCPLN)
 * BitBay.net (BTCPLN)
-* LakeBTC.com (BTCUSD)
 
 Application consist of AppIndicator displaying current price in Tray area and main window showing chart from last hour.
 
@@ -27,22 +26,6 @@ Install dependencies first. On Debian-based distributions you can do it with com
 	sudo apt-get install python3 python3-gi python3-matplotlib gir1.2-appindicator3-0.1
 
 On GNOME Shell you should also install and enable extension "KStatusNotifierItem/AppIndicator Support" to get indicator working.
-
-
-If you are getting error related to lack of indicator:
-
-    Namespace AppIndicator3 not available
-
-You must install following library by running this command:
-
-    apt-get install gir1.2-appindicator3-0.1
-
-This error will probably appear for environments without AppIndicator available (Gnome Shell)
-
-Additionally for gnome shell you must install and enable following extension allowing to add AppIndicators:
-
-    KStatusNotifierItem/AppIndicator Support
-
 
 Then you can run the application:
 

@@ -324,7 +324,7 @@ class LakeBTCExchangeProvider(ExchangeProvider):
         return float(data['btcusd']['last'])
 
     def graph(self, market, period_seconds, resolution):
-        resp = requests.get('https://api.lakebtc.com/api_v2/bctrades?symbol=btcusd'.format(market.lower()))
+        resp = requests.get('https://api.lakebtc.com/api_v2/bctrades?symbol={}'.format(market.lower()))
         resp.raise_for_status()
         data = resp.json()
         timestamps = [e['date'] for e in data]
@@ -371,7 +371,7 @@ class _ExchangeProviderFactory:
             BitMarketExchangeProvider.ID,
             BitstampExchangeProvider.ID,
             BitfinexExchangeProvider.ID,
-            LakeBTCExchangeProvider.ID
+            LakeBTCExchangeProvider.ID,
         ]
 
 
